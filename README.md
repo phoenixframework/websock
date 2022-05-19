@@ -1,11 +1,11 @@
 # Sock
 
-**TODO: Add description**
+Sock is a specification for apps to service WebSocket connections. You can think
+of it as 'Plug for WebSockets'.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `sock` to your list of dependencies in `mix.exs`:
+The sock package can be installed by adding `sock` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
@@ -15,7 +15,8 @@ def deps do
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/sock>.
+Documentation can be found at <https://hexdocs.pm/sock>.
 
+## License
+
+MIT
