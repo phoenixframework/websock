@@ -1,5 +1,10 @@
 # Sock
 
+[![Build Status](https://github.com/mtrudel/sock/workflows/Elixir%20CI/badge.svg)](https://github.com/mtrudel/sock/actions)
+[![Docs](https://img.shields.io/badge/api-docs-green.svg?style=flat)](https://hexdocs.pm/sock)
+[![Hex.pm](https://img.shields.io/hexpm/v/sock.svg?style=flat&color=blue)](https://hex.pm/packages/sock)
+
+
 Sock is a specification for apps to service WebSocket connections; you can think
 of it as 'Plug for WebSockets'. Web servers such as
 [Bandit](https://github.com/mtrudel/bandit/) or
