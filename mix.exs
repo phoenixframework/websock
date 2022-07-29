@@ -8,8 +8,9 @@ defmodule Sock.MixProject do
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      dialyzer: dialyzer(),
       name: "Sock",
-      description: "An specification for apps to service WebSocket connections",
+      description: "An specification for WebSocket connections",
       source_url: "https://github.com/mtrudel/sock",
       package: [
         files: ["lib", "test", "mix.exs", "README*", "LICENSE*"],
@@ -21,15 +22,19 @@ defmodule Sock.MixProject do
   end
 
   def application do
-    [
-      extra_applications: [:logger]
-    ]
+    []
   end
 
   defp deps do
     [
       {:plug, "~> 1.12"},
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.0", only: [:dev, :test], runtime: false}
     ]
+  end
+
+  defp dialyzer do
+    [plt_core_path: "priv/plts", plt_file: {:no_warn, "priv/plts/dialyzer.plt"}]
   end
 end
