@@ -10,8 +10,8 @@ of it as 'Plug for WebSockets'. Web servers such as
 [Bandit](https://github.com/mtrudel/bandit/) or
 [Cowboy](https://github.com/ninenines/cowboy) are expected to implement support
 for hosting Sock-based applications (possibly by way of an adapter library such
-as [Plug.Cowboy](https://github.com/elixir-plug/plug_cowboy/). WebSocket aware
-applications such as Phoenix can then be hosted within an supported web server
+as [Plug.Cowboy](https://github.com/elixir-plug/plug_cowboy/)). WebSocket-aware
+applications such as Phoenix can then be hosted within a supported web server
 simply by defining conformance to the `Sock` behaviour, in the same manner as
 how Plug conformance allows their HTTP aspects to be hosted within an arbitrary
 web server.
