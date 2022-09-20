@@ -42,7 +42,8 @@ defmodule Sock do
 
   @doc """
   Called by a web server implementation to provide initial state for all future connections. The
-  manner by which the `init_arg` value passed into this callback is implementation dependent.
+  manner by which the user specifies the `init_arg` value passed into this callback is
+  implementation dependent.
 
   The result returned by init/1 is used as the initial state of all connections using the `Sock`
   implementation. Note that init/1 may be called during compilation and as such it must not return
@@ -133,7 +134,8 @@ defmodule Sock do
   * A `Sock` callback for this connection returned a `{:close, state()}` tuple. The status code
     in this case will be 1000. The socket connection will still be open in this case
   * The client send a connection close frame. The status code in this case will be the one sent
-    by the client. The socket connection will still be open in this case
+    by the client. The socket connection will still be open in this case, although note should be
+    taken of the fact that the client may not be listening any longer
   * The underlying TCP connection connection was closed by the client. The status code in this
     case will be 1006. The socket connection will be closed in this case
   * The hosting web server is being shut down. The status code in this case will be 1001. The
