@@ -167,4 +167,13 @@ defmodule Sock do
   The return value from this callback is ignored
   """
   @callback handle_timeout(Sock.Socket.t(), state()) :: any()
+
+  @doc """
+  Called by the web server implementation when the socket process receives
+  a `c:GenServer.handle_info/2` call which was not otherwise processed by the server
+  implementation.
+
+  The return value from this callback is handled as described in `c:handle_connection/2`
+  """
+  @callback handle_info(term(), Sock.Socket.t(), state()) :: handle_result()
 end
