@@ -31,8 +31,18 @@ defmodule Sock do
   @typedoc "The type of state passed into / returned from `Sock` callbacks"
   @type state :: term()
 
+  @typedoc """
+  The type of options returned from the `c:negotiate/2` callback. Possible values have the
+  following meanings:
+
+  * `timeout`: Specifies a value to be used for timeout conditions on this connection
+  """
+  @type negotiate_opts :: {:timeout, timeout()}
+
   @typedoc "The result as returned from negotiate calls"
-  @type negotiate_result :: {:accept, Plug.Conn.t(), state()} | {:refuse, Plug.Conn.t(), state()}
+  @type negotiate_result ::
+          {:accept, Plug.Conn.t(), state(), [negotiate_opts()]}
+          | {:refuse, Plug.Conn.t(), state()}
 
   @typedoc "The result as returned from many handle_ calls"
   @type handle_result :: {:continue, state()} | {:close, state()} | {:error, term(), state()}
@@ -63,10 +73,13 @@ defmodule Sock do
   lifecycle, this callback should store such values in the returned connection state.
 
   If the `Sock` implementation wishes to accept this connection, it should return a `{:accept,
-  Plug.Conn.t(), state()}` tuple. The web server will then perform its half of the connection
-  handshake as outlined in RFC6455§4.2, and subsequently call `c:handle_connection/2`. The `Sock`
-  implementation MUST NOT send any data on the `Plug.Conn` connection in this case, or else the
-  handshake will not be able to complete.
+  Plug.Conn.t(), state(), [opts()]}` tuple. The web server will then perform its half of the
+  connection handshake as outlined in RFC6455§4.2, and subsequently call `c:handle_connection/2`.
+  The `Sock` implementation MUST NOT send any data on the `Plug.Conn` connection in this case, or
+  else the handshake will not be able to complete.
+
+  Valid options to return in the final `accept` tuple value are as described in the
+  `t:negotiate_opts()` type.
 
   If the `Sock` implementation wishes to refuse this connection, it should:
     * Create an HTTP response on the `Plug.Conn` connection describing the reason for refusal
