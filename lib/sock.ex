@@ -50,6 +50,9 @@ defmodule Sock do
   @typedoc "A WebSocket status code"
   @type status_code :: non_neg_integer()
 
+  @typedoc "Details about why connection is being closed"
+  @type close_reason :: {:local, status_code()} | {:remote, status_code()}
+
   @doc """
   Called by a web server implementation to provide initial state for all future connections. The
   manner by which the user specifies the `init_arg` value passed into this callback is
@@ -144,19 +147,18 @@ defmodule Sock do
   Called by the web server implementation when a connection is being closed due to one of the
   following reasons:
 
-  * A `Sock` callback for this connection returned a `{:close, state()}` tuple. The status code
-    in this case will be 1000. The socket connection will still be open in this case
-  * The client send a connection close frame. The status code in this case will be the one sent
-    by the client. The socket connection will still be open in this case, although note should be
-    taken of the fact that the client may not be listening any longer
-  * The underlying TCP connection connection was closed by the client. The status code in this
-    case will be 1006. The socket connection will be closed in this case
-  * The hosting web server is being shut down. The status code in this case will be 1001. The
-    socket connection will still be open in this case
+  * A `Sock` callback for this connection returned a `{:close, state()}` tuple. The reason will
+    be `{:local, 1000}`. The socket connection will still be open in this case
+  * The hosting web server is being shut down. The reason will be `{:local, 1001}`. The socket
+    connection will still be open in this case
+  * The client send a connection close frame. The reason will be `{:remote, code}`, where `code`
+    is the status code sent by the client (or 1005 is no status code was sent). The socket
+    connection will still be open in this case, although care should be taken of the fact that
+    the client may not be listening any longer
 
   The return value from this callback is ignored
   """
-  @callback handle_close(status_code(), Sock.Socket.t(), state()) :: any()
+  @callback handle_close(close_reason(), Sock.Socket.t(), state()) :: any()
 
   @doc """
   Called by the web server implementation when a connection is being closed due to one of the
@@ -164,6 +166,8 @@ defmodule Sock do
 
   * A `Sock` callback for this connection returned an `{:error, reason, state()}` tuple. The 
     socket connection will still be open in this case
+  * The underlying TCP connection was closed unexpectedly. The socket connection will be closed
+    in this case
   * The underlying TCP connection connection encountered an error. The socket connection will be
     closed in this case
 
