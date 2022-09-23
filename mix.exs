@@ -10,7 +10,7 @@ defmodule Sock.MixProject do
       deps: deps(),
       dialyzer: dialyzer(),
       name: "Sock",
-      description: "An specification for WebSocket connections",
+      description: "A specification for WebSocket connections",
       source_url: "https://github.com/mtrudel/sock",
       package: [
         files: ["lib", "test", "mix.exs", "README*", "LICENSE*"],
