@@ -58,8 +58,8 @@ defmodule Sock do
   manner by which the user specifies the `init_arg` value passed into this callback is
   implementation dependent.
 
-  The result returned by init/1 is used as the initial state of all connections using the `Sock`
-  implementation. Note that init/1 may be called during compilation and as such it must not return
+  The result returned by `c:Sock.init/1` is used as the initial state of all connections using the `Sock`
+  implementation. Note that `c:Sock.init/1` may be called during compilation and as such it must not return
   pids, ports or values that are specific to the runtime.
   """
   @callback init(init_arg :: term()) :: state()
