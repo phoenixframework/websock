@@ -52,7 +52,7 @@ defmodule Sock do
   @typedoc "All possible frame types"
   @type opcode :: data_opcode() | control_opcode()
 
-  @typedoc "The result as returned from handle_in and handle_info calls"
+  @typedoc "The result as returned from init, handle_in, handle_control & handle_info calls"
   @type handle_result ::
           {:push, {opcode(), message()}, state()}
           | {:reply, term(), {opcode(), message()}, state()}
@@ -69,10 +69,9 @@ defmodule Sock do
   subscribing the client to any relevant subscriptions within the application, or any other
   task which should be undertaken at the time the connection is established
 
-  The return value from this function forms the initial value of the state which is passed into
-  subsequent callbacks
+  The return value from this callback is handled as described in `c:handle_in/2`
   """
-  @callback init(term()) :: {:ok, state()}
+  @callback init(term()) :: handle_result()
 
   @doc """
   Called by the web server implementation when a frame is received from the client. The server
