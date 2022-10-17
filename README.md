@@ -37,8 +37,7 @@ the shape of the `Sock` behaviour:
 * **This step is outside the scope of the Sock API**. A client will
   attempt to Upgrade an HTTP connection to a WebSocket connection by passing
   a specific set of headers in an HTTP request. An application may choose to
-  determine the feasibility of the upgrade request however it pleases, though
-  the `Plug.WebSocket` module includes several conveniences for this purpose.
+  determine the feasibility of the upgrade request however it pleases.
   Most typically, an application will then signal an upgrade to be performed by
   calling the `Plug.Conn.upgrade_adapter/3` callback with parameters indicating
   an upgrade to Sock (note that the structure of these arguments depends on the
