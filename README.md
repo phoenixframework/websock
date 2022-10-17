@@ -19,47 +19,49 @@ web server.
 The Sock specification is just that; a specification. There is no actual *code*
 in this specification as there is within the Plug specification, largely due to
 the lower-level nature of WebSockets as compared to HTTP. What you *will* find
-here consists of a few interfaces along with conventions as to how they reflect
-the lifecycle of a WebSocket connection:
+here consists of simple interface which dictates conventions about how the
+lifecycle of a WebSocket connection is managed.
 
-* The `Sock` behaviour describes the functions that an application must
-  implement in order to be Sock compliant; it is the equivalent of the `Plug`
-  interface, but for WebSocket connections. Server implementations are expected
-  to allow users to define which user-provided module is to be used as the `Sock`
-  implementation for a given server, in a manner similar to `Plug`.
-* The `Socket` protocol describes a mechanism for Sock applications to send data
-  to a connected WebSocket client. It is the equivalent of the `Plug.Conn`
-  interface, but for WebSocket connections. Server implementations are expected
-  to provide a concrete implementation of this protocol for whichever type is
-  passed in to `Sock` calls as the socket value.
-
-The above is intended primarily as a high-level overview to provide a conceptual
-understanding of how all the building blocks of `Sock` fit together. For more
-information, consult the [docs](https://hexdocs.pm/sock).
+The `Sock` behaviour describes the functions that an application must
+implement in order to be Sock compliant; it is the equivalent of the `Plug`
+interface, but for WebSocket connections. Server implementations are expected
+to manage the upgrade process to WebSocket connections themselves, based on
+their specific policy and routing decisions and aided by helper functions within
+the Plug API (see below for details).
 
 ## WebSocket Lifecycle
 
 WebSocket connections go through a well defined lifecycle, which is reflected in
 the shape of the `Sock` behaviour:
 
-* First, a client will attempt to Upgrade an HTTP connection to a WebSocket
-  connection by passing a specific set of headers in an HTTP request. A `Sock`
-  implementation is notified of this via a call to `c:Sock.negotiate/2`. The
-  implementation can inspect the request, which is passed as a `Plug.Conn`
-  structure. It can then choose to accept or refuse the WebSocket upgrade
-  request
-* Assuming the `Sock` implementation accepted the WebSocket connection, the
-  HTTP connection is then upgraded to a WebSocket connection, and
-  `c:Sock.handle_connection/2` is called to notify the implementation that the
-  connection is now live
-* The `Sock` implementation will then be notified of client data by way of
-  `c:Sock.handle_text_frame/3`, `c:Sock.handle_binary_frame/3`,
-  `c:Sock.handle_ping_frame/3` or `c:Sock.handle_pong_frame/3` as appropriate.
-* The `Sock` implementation is free to send data to the client via the passed in
-  `Socket` instance at any time
-* At any time, `c:Sock.handle_close/3`, `c:Sock.handle_error/3` or
-  `c:Sock.handle_timeout/2` may be called to indicate a close, error or timeout
-  condition respectively
+* **This step is outside the scope of the Sock API**. A client will
+  attempt to Upgrade an HTTP connection to a WebSocket connection by passing
+  a specific set of headers in an HTTP request. An application may choose to
+  determine the feasibility of the upgrade request however it pleases, though
+  the `Plug.WebSocket` module includes several conveniences for this purpose.
+  Most typically, an application will then signal an upgrade to be performed by
+  calling the `Plug.Conn.upgrade_adapter/3` callback with parameters indicating
+  an upgrade to Sock (note that the structure of these arguments depends on the
+  particular server in use; consult `Bandit` or `Plug.Cowboy` documentation for
+  details)
+* Assuming the application accepted the WebSocket connection, the underlying
+  server will then upgrade the HTTP connection to a WebSocket connection, and
+  will call `c:Sock.init/1` to allow the application to perform any necessary
+  tasks now that the WebSocket connection is live
+* The `Sock` implementation will be notified of client data by way of the
+  `c:Sock.handle_in/2` callback
+* The `Sock` implementation may choose to be notified of control frames by way of the
+  optional `c:Sock.handle_control/2` callback. Note that user implementations DO
+  NOT need to concern themselves with issuing pong frames in response to ping
+  requests; the underlying server implementation MUST handle this
+* The `Sock` implementation will be notified of any messages sent to it by
+  other processes by way of the `c:Sock.handle_info/2` callback
+* The `Sock` implementation can send data to the client by returning
+  a `{:push,...}` tuple from any of the above `handle_*` callback
+* At any time, `c:Sock.terminate/2` may be called to indicate a close, error or
+  timeout condition 
+
+For more information, consult the [docs](https://hexdocs.pm/sock).
 
 ## Installation
 
@@ -68,7 +70,7 @@ The sock package can be installed by adding `sock` to your list of dependencies 
 ```elixir
 def deps do
   [
-    {:sock, "~> 0.2.5"}
+    {:sock, "~> 0.3.0"}
   ]
 end
 ```

@@ -4,7 +4,7 @@ defmodule Sock.MixProject do
   def project do
     [
       app: :sock,
-      version: "0.2.5",
+      version: "0.3.0",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -27,7 +27,6 @@ defmodule Sock.MixProject do
 
   defp deps do
     [
-      {:plug, "~> 1.13"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.0", only: [:dev, :test], runtime: false}
