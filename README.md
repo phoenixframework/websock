@@ -69,7 +69,7 @@ The sock package can be installed by adding `sock` to your list of dependencies 
 ```elixir
 def deps do
   [
-    {:sock, "~> 0.3.0"}
+    {:sock, "~> 0.3.1"}
   ]
 end
 ```
