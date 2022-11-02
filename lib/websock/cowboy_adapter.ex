@@ -8,48 +8,33 @@ defmodule WebSock.CowboyAdapter do
   @impl true
   def init(req, state), do: {:cowboy_websocket, req, state}
 
-  defp handle_reply(handler, {:ok, state}), do: {:ok, [handler | state]}
-  defp handle_reply(handler, {:push, data, state}), do: {:reply, data, [handler | state]}
-
-  defp handle_reply(handler, {:reply, _status, data, state}),
-    do: {:reply, data, [handler | state]}
-
-  defp handle_reply(handler, {:stop, _reason, state}), do: {:stop, [handler | state]}
-
-  defp handle_control_frame(payload_with_opts, handler_state) do
-    [handler | state] = handler_state
-
-    reply =
-      if function_exported?(handler, :handle_control, 2) do
-        handler.handle_control(payload_with_opts, state)
-      else
-        {:ok, state}
-      end
-
-    handle_reply(handler, reply)
-  end
-
   @impl true
   def websocket_init({handler, process_flags, state}) do
     for {key, value} <- process_flags do
       :erlang.process_flag(key, value)
     end
 
-    {:ok, state} = handler.init(state)
-    {:ok, [handler | state]}
+    handler.init(state)
+    |> handle_reply(handler)
   end
 
   @impl true
-  def websocket_handle({opcode, payload}, [handler | state]) when opcode in [:text, :binary] do
-    handle_reply(handler, handler.handle_in({payload, opcode: opcode}, state))
+  def websocket_handle({opcode, payload}, {handler, state}) when opcode in [:text, :binary] do
+    handler.handle_in({payload, opcode: opcode}, state)
+    |> handle_reply(handler)
   end
 
-  def websocket_handle({opcode, payload}, handler_state) when opcode in [:ping, :pong] do
-    handle_control_frame({payload, opcode: opcode}, handler_state)
+  def websocket_handle({opcode, payload}, {handler, state}) when opcode in [:ping, :pong] do
+    if function_exported?(handler, :handle_control, 2) do
+      handler.handle_control({payload, opcode: opcode}, state)
+    else
+      {:ok, state}
+    end
+    |> handle_reply(handler)
   end
 
   def websocket_handle(opcode, handler_state) when opcode in [:ping, :pong] do
-    handle_control_frame({nil, opcode: opcode}, handler_state)
+    websocket_handle({opcode, nil}, handler_state)
   end
 
   def websocket_handle(_other, handler_state) do
@@ -57,29 +42,24 @@ defmodule WebSock.CowboyAdapter do
   end
 
   @impl true
-  def websocket_info(message, [handler | state]) do
-    handle_reply(handler, handler.handle_info(message, state))
+  def websocket_info(message, {handler, state}) do
+    handler.handle_info(message, state)
+    |> handle_reply(handler)
   end
 
   @impl true
-  def terminate({:error, :closed}, _req, [handler | state]) do
-    handler.terminate(:closed, state)
-  end
-
-  def terminate({:remote, :closed}, _req, [handler | state]) do
-    handler.terminate(:closed, state)
-  end
-
-  def terminate({:remote, code, _}, _req, [handler | state])
+  def terminate({:remote, code, _}, _req, {handler, state})
       when code in 1000..1003 or code in 1005..1011 or code == 1015 do
-    handler.terminate(:closed, state)
+    handler.terminate(:remote, state)
   end
 
-  def terminate(:remote, _req, [handler | state]) do
-    handler.terminate(:closed, state)
-  end
+  def terminate({:remote, :closed}, _req, {handler, state}), do: handler.terminate(:closed, state)
+  def terminate(:remote, _req, {handler, state}), do: handler.terminate(:remote, state)
+  def terminate(:stop, _req, {handler, state}), do: handler.terminate(:normal, state)
+  def terminate(reason, _req, {handler, state}), do: handler.terminate(reason, state)
 
-  def terminate(reason, _req, [handler | state]) do
-    handler.terminate(reason, state)
-  end
+  defp handle_reply({:ok, state}, handler), do: {:ok, {handler, state}}
+  defp handle_reply({:push, data, state}, handler), do: {:reply, data, {handler, state}}
+  defp handle_reply({:reply, _status, data, state}, handler), do: {:reply, data, {handler, state}}
+  defp handle_reply({:stop, _reason, state}, handler), do: {:stop, {handler, state}}
 end

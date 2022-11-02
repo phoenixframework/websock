@@ -177,4 +177,7 @@ defmodule WebSock do
 
     {WebSock.CowboyAdapter, {websock, process_flags, state}, cowboy_opts}
   end
+
+  defp tuple_for(adapter, _websock, _state, _opts),
+    do: raise(ArgumentError, "Unknown adapter #{inspect(adapter)}")
 end
