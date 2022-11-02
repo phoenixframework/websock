@@ -33,6 +33,13 @@ defmodule WebSock do
   @typedoc "The type of state passed into / returned from `WebSock` callbacks"
   @type state :: term()
 
+  @typedoc "The type of a supported connection option"
+  @type connection_opt ::
+          {:compress, boolean()}
+          | {:timeout, timeout()}
+          | {:max_frame_size, non_neg_integer()}
+          | {:fullsweep_after, non_neg_integer()}
+
   @typedoc "The structure of a sent or received WebSocket message body"
   @type message :: iodata() | nil
 
@@ -152,6 +159,7 @@ defmodule WebSock do
   * `:fullsweep_after`: The maximum number of garbage collections before forcing a fullsweep of
    the WebSocket connection process. Setting this option requires OTP 24 or newer
   """
+  @spec upgrade(Plug.Conn.t(), impl(), state(), [connection_opt()]) :: Plug.Conn.t()
   def upgrade(%{adapter: {adapter, _}} = conn, websock, state, opts) do
     Plug.Conn.upgrade_adapter(conn, :websocket, tuple_for(adapter, websock, state, opts))
   end
