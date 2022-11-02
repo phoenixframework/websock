@@ -1,36 +1,30 @@
 defmodule WebSock do
   @moduledoc """
-  The `WebSock` behaviour defines an interface for web servers to flexibly host WebSocket
-  applications.
+  Defines a behaviour which defines an interface for web servers to flexibly host WebSocket
+  applications. Also provides a consistent upgrade facility to upgrade `Plug.Conn` requests to 
+  `WebSock` connections for supported servers.
 
-  The lifecycle of a WebSocket connection is codified in the structure of this behaviour, and
-  proceeds as follows:
+  WebSocket connections go through a well defined lifecycle mediated by `WebSock`:
 
   * **This step is outside the scope of the WebSock API**. A client will
-    attempt to Upgrade an HTTP connection to a WebSocket connection by passing
-    a specific set of headers in an HTTP request. An application may choose to
-    determine the feasibility of the upgrade request however it pleases.
-    Most typically, an application will then signal an upgrade to be performed by
-    calling the `Plug.Conn.upgrade_adapter/3` callback with parameters indicating
-    an upgrade to WebSock (note that the structure of these arguments depends on the
-    particular server in use; consult `Bandit` or `Plug.Cowboy` documentation for
-    details)
-  * Assuming the application accepted the WebSocket connection, the underlying
-    server will then upgrade the HTTP connection to a WebSocket connection, and
-    will call `c:WebSock.init/1` to allow the application to perform any necessary
-    tasks now that the WebSocket connection is live
-  * The `WebSock` implementation will be notified of client data by way of the
-    `c:WebSock.handle_in/2` callback
-  * The `WebSock` implementation may choose to be notified of control frames by way of the
-    optional `c:WebSock.handle_control/2` callback. Note that user implementations DO
-    NOT need to concern themselves with issuing pong frames in response to ping
-    requests; the underlying server implementation MUST handle this
-  * The `WebSock` implementation will be notified of any messages sent to it by
-    other processes by way of the `c:WebSock.handle_info/2` callback
+  attempt to Upgrade an HTTP connection to a WebSocket connection by passing
+  a specific set of headers in an HTTP request. An application may choose to
+  determine the feasibility of such an upgrade request however it pleases
+  * An application will then signal an upgrade to be performed by calling `WebSock.upgrade/4`, passing
+  in the `Plug.Conn` to upgrade, along with the `WebSock` compliant handler module which
+  will handle the connection once it is upgraded
+  * The underlying server will then attempt to upgrade the HTTP connection to a WebSocket connection 
+  * Assuming the WebSocket connection is successfully negotiated, WebSock will
+  call `c:WebSock.init/1` on the configured handler to allow the application to perform any necessary
+  tasks now that the WebSocket connection is live
+  * WebSock will call the configued handler's `c:WebSock.handle_in/2` callback
+  whenever data is received from the client
+  * WebSock will call the configued handler's `c:WebSock.handle_info/2` callback
+  whenever other processes send messages to the handler process
   * The `WebSock` implementation can send data to the client by returning
-    a `{:push, ...}` or `{:reply, ...}` tuple from any of the above `handle_*` callback
+  a `{:push,...}` tuple from any of the above `handle_*` callback
   * At any time, `c:WebSock.terminate/2` may be called to indicate a close, error or
-    timeout condition 
+  timeout condition 
   """
 
   @typedoc "The type of an implementing module"
@@ -62,20 +56,20 @@ defmodule WebSock do
   @type close_reason :: :normal | :remote | :shutdown | :timeout | {:error, term()}
 
   @doc """
-  Called by the web server implementation after a WebSocket connection has been established (that
-  is, after the server has accepted the connection & the WebSocket handshake has been
-  successfully completed). Implementations can use this callback to perform tasks such as
-  subscribing the client to any relevant subscriptions within the application, or any other
-  task which should be undertaken at the time the connection is established
+  Called by WebSock after a WebSocket connection has been established (that is, after the server
+  has accepted the connection & the WebSocket handshake has been successfully completed).
+  Implementations can use this callback to perform tasks such as subscribing the client to any
+  relevant subscriptions within the application, or any other task which should be undertaken at
+  the time the connection is established
 
   The return value from this callback is handled as described in `c:handle_in/2`
   """
   @callback init(term()) :: handle_result()
 
   @doc """
-  Called by the web server implementation when a frame is received from the client. The server
-  implementation will only call this function once a complete frame has been received (that is,
-  once any continuation frames have been received).
+  Called by WebSock when a frame is received from the client. WebSock will only call this function
+  once a complete frame has been received (that is, once any continuation frames have been
+  received).
 
   The return value from this callback are processed as follows:
 
@@ -96,12 +90,12 @@ defmodule WebSock do
   @callback handle_in({message(), opcode: data_opcode()}, state()) :: handle_result()
 
   @doc """
-  Called by the web server implementation when a ping or pong frame has been received from the client.
-  Note that `WebSock` implementation SHOULD NOT send a pong frame in response; this MUST be
-  automatically done by the web server before this callback has been called.
+  Called by WebSock when a ping or pong frame has been received from the client. Note that
+  implementations SHOULD NOT send a pong frame in response; this MUST be automatically done by the
+  web server before this callback has been called.
 
   Despite the name of this callback, it is not called for connection close frames even though they
-  are technically control frames. The server implementation will handle any received connection
+  are technically control frames. WebSock will handle any received connection
   close frames and issue calls to `c:terminate/2` as / if appropriate
 
   This callback is optional
@@ -111,17 +105,15 @@ defmodule WebSock do
   @callback handle_control({message(), opcode: control_opcode()}, state()) :: handle_result()
 
   @doc """
-  Called by the web server implementation when the socket process receives
-  a `c:GenServer.handle_info/2` call which was not otherwise processed by the server
-  implementation.
+  Called by WebSock when the socket process receives a `c:GenServer.handle_info/2` call which was
+  not otherwise processed by the server implementation.
 
   The return value from this callback is handled as described in `c:handle_in/2`
   """
   @callback handle_info(term(), state()) :: handle_result()
 
   @doc """
-  Called by the web server implementation when a connection is closed. `reason` may be one of the
-  following:
+  Called by WebSock when a connection is closed. `reason` may be one of the following:
 
   * `:normal`: The local end shut down the connection normally, by returning a `{:stop, :normal,
     state()}` tuple from one of the `WebSock.handle_*` callbacks
@@ -138,6 +130,28 @@ defmodule WebSock do
 
   @optional_callbacks handle_control: 2
 
+  @doc """
+  Upgrades the provided `Plug.Conn` connection request to a `WebSock` connection using the
+  provided `WebSock` compliant module as a handler.
+
+  This function returns the passed `conn` set to an `:upgraded` state.
+
+  The provided `state` value will be used as the argument for `c:init/1` once the WebSocket
+  connection has been successfully negotiated.
+
+  The `opts` keyword list argument allows a number of options to be set on the WebSocket
+  connection. Not all options may be supported by the underlying HTTP server. Possible values are
+  as follows:
+
+  * `timeout`: The number of milliseconds to wait after no client data is received before
+   closing the connection. Defaults to `60_000`
+  * `compress`: Whether or not to accept negotiation of a compression extension with the client.
+   Defaults to `false`
+  * `max_frame_size`: The maximum frame size to accept, in octets. If a frame size larger than this
+   is received the connection will be closed. Defaults to `:infinity`
+  * `:fullsweep_after`: The maximum number of garbage collections before forcing a fullsweep of
+   the WebSocket connection process. Setting this option requires OTP 24 or newer
+  """
   def upgrade(%{adapter: {adapter, _}} = conn, websock, state, opts) do
     Plug.Conn.upgrade_adapter(conn, :websocket, tuple_for(adapter, websock, state, opts))
   end
