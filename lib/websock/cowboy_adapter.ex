@@ -54,7 +54,6 @@ defmodule WebSock.CowboyAdapter do
   end
 
   def terminate({:remote, :closed}, _req, {handler, state}), do: handler.terminate(:closed, state)
-  def terminate(:remote, _req, {handler, state}), do: handler.terminate(:remote, state)
   def terminate(:stop, _req, {handler, state}), do: handler.terminate(:normal, state)
   def terminate(reason, _req, {handler, state}), do: handler.terminate(reason, state)
 
