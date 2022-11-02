@@ -1,22 +1,22 @@
-defmodule Sock.MixProject do
+defmodule WebSock.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :sock,
+      app: :websock,
       version: "0.3.1",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       dialyzer: dialyzer(),
-      name: "Sock",
+      name: "WebSock",
       description: "A specification for WebSocket connections",
-      source_url: "https://github.com/mtrudel/sock",
+      source_url: "https://github.com/mtrudel/websock",
       package: [
         files: ["lib", "test", "mix.exs", "README*", "LICENSE*"],
         maintainers: ["Mat Trudel"],
         licenses: ["MIT"],
-        links: %{"GitHub" => "https://github.com/mtrudel/sock"}
+        links: %{"GitHub" => "https://github.com/mtrudel/websock"}
       ]
     ]
   end

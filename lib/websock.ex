@@ -1,42 +1,42 @@
-defmodule Sock do
+defmodule WebSock do
   @moduledoc """
-  The `Sock` behaviour defines an interface for web servers to flexibly host WebSocket
+  The `WebSock` behaviour defines an interface for web servers to flexibly host WebSocket
   applications.
 
   The lifecycle of a WebSocket connection is codified in the structure of this behaviour, and
   proceeds as follows:
 
-  * **This step is outside the scope of the Sock API**. A client will
+  * **This step is outside the scope of the WebSock API**. A client will
     attempt to Upgrade an HTTP connection to a WebSocket connection by passing
     a specific set of headers in an HTTP request. An application may choose to
     determine the feasibility of the upgrade request however it pleases.
     Most typically, an application will then signal an upgrade to be performed by
     calling the `Plug.Conn.upgrade_adapter/3` callback with parameters indicating
-    an upgrade to Sock (note that the structure of these arguments depends on the
+    an upgrade to WebSock (note that the structure of these arguments depends on the
     particular server in use; consult `Bandit` or `Plug.Cowboy` documentation for
     details)
   * Assuming the application accepted the WebSocket connection, the underlying
     server will then upgrade the HTTP connection to a WebSocket connection, and
-    will call `c:Sock.init/1` to allow the application to perform any necessary
+    will call `c:WebSock.init/1` to allow the application to perform any necessary
     tasks now that the WebSocket connection is live
-  * The `Sock` implementation will be notified of client data by way of the
-    `c:Sock.handle_in/2` callback
-  * The `Sock` implementation may choose to be notified of control frames by way of the
-    optional `c:Sock.handle_control/2` callback. Note that user implementations DO
+  * The `WebSock` implementation will be notified of client data by way of the
+    `c:WebSock.handle_in/2` callback
+  * The `WebSock` implementation may choose to be notified of control frames by way of the
+    optional `c:WebSock.handle_control/2` callback. Note that user implementations DO
     NOT need to concern themselves with issuing pong frames in response to ping
     requests; the underlying server implementation MUST handle this
-  * The `Sock` implementation will be notified of any messages sent to it by
-    other processes by way of the `c:Sock.handle_info/2` callback
-  * The `Sock` implementation can send data to the client by returning
+  * The `WebSock` implementation will be notified of any messages sent to it by
+    other processes by way of the `c:WebSock.handle_info/2` callback
+  * The `WebSock` implementation can send data to the client by returning
     a `{:push, ...}` or `{:reply, ...}` tuple from any of the above `handle_*` callback
-  * At any time, `c:Sock.terminate/2` may be called to indicate a close, error or
+  * At any time, `c:WebSock.terminate/2` may be called to indicate a close, error or
     timeout condition 
   """
 
   @typedoc "The type of an implementing module"
   @type impl :: module()
 
-  @typedoc "The type of state passed into / returned from `Sock` callbacks"
+  @typedoc "The type of state passed into / returned from `WebSock` callbacks"
   @type state :: term()
 
   @typedoc "The structure of a sent or received WebSocket message body"
@@ -97,7 +97,7 @@ defmodule Sock do
 
   @doc """
   Called by the web server implementation when a ping or pong frame has been received from the client.
-  Note that `Sock` implementation SHOULD NOT send a pong frame in response; this MUST be
+  Note that `WebSock` implementation SHOULD NOT send a pong frame in response; this MUST be
   automatically done by the web server before this callback has been called.
 
   Despite the name of this callback, it is not called for connection close frames even though they
@@ -124,12 +124,12 @@ defmodule Sock do
   following:
 
   * `:normal`: The local end shut down the connection normally, by returning a `{:stop, :normal,
-    state()}` tuple from one of the `Sock.handle_*` callbacks
+    state()}` tuple from one of the `WebSock.handle_*` callbacks
   * `:remote`: The remote end shut down the connection
   * `:shutdown`: The local server is being shut down
   * `:timeout`: No data has been sent or received for more than the configured timeout duration
   * `{:error, reason}`: An error ocurred. This may be the result of error
-    handling in the local server, or the result of a `Sock.handle_*` callback returning a `{:stop,
+    handling in the local server, or the result of a `WebSock.handle_*` callback returning a `{:stop,
     reason, state}` tuple where reason is any value other than `:normal`
 
   The return value of this callback is ignored
