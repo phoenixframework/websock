@@ -137,4 +137,30 @@ defmodule WebSock do
   @callback terminate(reason :: close_reason(), state()) :: any()
 
   @optional_callbacks handle_control: 2
+
+  def upgrade(%{adapter: {adapter, _}} = conn, websock, state, opts) do
+    Plug.Conn.upgrade_adapter(conn, :websocket, tuple_for(adapter, websock, state, opts))
+  end
+
+  defp tuple_for(Bandit.HTTP1.Adapter, websock, state, opts), do: {websock, state, opts}
+  defp tuple_for(Bandit.HTTP2.Adapter, websock, state, opts), do: {websock, state, opts}
+
+  defp tuple_for(Plug.Cowboy.Conn, websock, state, opts) do
+    cowboy_opts =
+      opts
+      |> Enum.flat_map(fn
+        {:timeout, timeout} -> [idle_timeout: timeout]
+        {:compress, _} = opt -> [opt]
+        {:max_frame_size, _} = opt -> [opt]
+        _other -> []
+      end)
+      |> Map.new()
+
+    process_flags =
+      opts
+      |> Keyword.take([:fullsweep_after])
+      |> Map.new()
+
+    {WebSock.CowboyAdapter, {websock, process_flags, state}, cowboy_opts}
+  end
 end

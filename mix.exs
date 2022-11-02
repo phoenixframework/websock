@@ -27,6 +27,8 @@ defmodule WebSock.MixProject do
 
   defp deps do
     [
+      {:plug, "~> 1.14.0"},
+      {:cowboy, "~> 2.7"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.0", only: [:dev, :test], runtime: false}
