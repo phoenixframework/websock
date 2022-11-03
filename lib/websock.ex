@@ -1,30 +1,37 @@
 defmodule WebSock do
   @moduledoc """
   Defines a behaviour which defines an interface for web servers to flexibly host WebSocket
-  applications. Also provides a consistent upgrade facility to upgrade `Plug.Conn` requests to 
-  `WebSock` connections for supported servers.
+  applications. It is commonly used in conjunction with the
+  [websock_adapters](https://hex.pm/packages/websock_adapters) package which defines concrete
+  adapters on top of [Bandit](https://github.com/mtrudel/bandit/) and
+  [Cowboy](https://github.com/ninenines/cowboy); the two packages are separate to allow for
+  servers which directly expose `WebSock` support to depend on just the behaviour. Users will
+  almost always want to depend on [websock_adapters](https://hex.pm/packages/websock_adapters)
+  instead of this package.
 
-  WebSocket connections go through a well defined lifecycle mediated by `WebSock`:
+  WebSocket connections go through a well defined lifecycle mediated by `WebSock` and
+  `WebSock.Adapters`:
 
   * **This step is outside the scope of the WebSock API**. A client will
-  attempt to Upgrade an HTTP connection to a WebSocket connection by passing
-  a specific set of headers in an HTTP request. An application may choose to
-  determine the feasibility of such an upgrade request however it pleases
-  * An application will then signal an upgrade to be performed by calling `WebSock.upgrade/4`, passing
-  in the `Plug.Conn` to upgrade, along with the `WebSock` compliant handler module which
-  will handle the connection once it is upgraded
+    attempt to Upgrade an HTTP connection to a WebSocket connection by passing
+    a specific set of headers in an HTTP request. An application may choose to
+    determine the feasibility of such an upgrade request however it pleases
+  * An application will then signal an upgrade to be performed by calling
+    `WebSockAdpater.upgrade/4`, passing in the `Plug.Conn` to upgrade, along with
+    the `WebSock` compliant handler module which will handle the connection once
+    it is upgraded
   * The underlying server will then attempt to upgrade the HTTP connection to a WebSocket connection 
   * Assuming the WebSocket connection is successfully negotiated, WebSock will
-  call `c:WebSock.init/1` on the configured handler to allow the application to perform any necessary
-  tasks now that the WebSocket connection is live
+    call `c:WebSock.init/1` on the configured handler to allow the application to perform any necessary
+    tasks now that the WebSocket connection is live
   * WebSock will call the configued handler's `c:WebSock.handle_in/2` callback
-  whenever data is received from the client
+    whenever data is received from the client
   * WebSock will call the configued handler's `c:WebSock.handle_info/2` callback
-  whenever other processes send messages to the handler process
+    whenever other processes send messages to the handler process
   * The `WebSock` implementation can send data to the client by returning
-  a `{:push,...}` tuple from any of the above `handle_*` callback
+    a `{:push,...}` tuple from any of the above `handle_*` callback
   * At any time, `c:WebSock.terminate/2` may be called to indicate a close, error or
-  timeout condition 
+    timeout condition 
   """
 
   @typedoc "The type of an implementing module"
@@ -32,13 +39,6 @@ defmodule WebSock do
 
   @typedoc "The type of state passed into / returned from `WebSock` callbacks"
   @type state :: term()
-
-  @typedoc "The type of a supported connection option"
-  @type connection_opt ::
-          {:compress, boolean()}
-          | {:timeout, timeout()}
-          | {:max_frame_size, non_neg_integer()}
-          | {:fullsweep_after, non_neg_integer()}
 
   @typedoc "The structure of a sent or received WebSocket message body"
   @type message :: iodata() | nil
@@ -136,56 +136,4 @@ defmodule WebSock do
   @callback terminate(reason :: close_reason(), state()) :: any()
 
   @optional_callbacks handle_control: 2
-
-  @doc """
-  Upgrades the provided `Plug.Conn` connection request to a `WebSock` connection using the
-  provided `WebSock` compliant module as a handler.
-
-  This function returns the passed `conn` set to an `:upgraded` state.
-
-  The provided `state` value will be used as the argument for `c:init/1` once the WebSocket
-  connection has been successfully negotiated.
-
-  The `opts` keyword list argument allows a number of options to be set on the WebSocket
-  connection. Not all options may be supported by the underlying HTTP server. Possible values are
-  as follows:
-
-  * `timeout`: The number of milliseconds to wait after no client data is received before
-   closing the connection. Defaults to `60_000`
-  * `compress`: Whether or not to accept negotiation of a compression extension with the client.
-   Defaults to `false`
-  * `max_frame_size`: The maximum frame size to accept, in octets. If a frame size larger than this
-   is received the connection will be closed. Defaults to `:infinity`
-  * `:fullsweep_after`: The maximum number of garbage collections before forcing a fullsweep of
-   the WebSocket connection process. Setting this option requires OTP 24 or newer
-  """
-  @spec upgrade(Plug.Conn.t(), impl(), state(), [connection_opt()]) :: Plug.Conn.t()
-  def upgrade(%{adapter: {adapter, _}} = conn, websock, state, opts) do
-    Plug.Conn.upgrade_adapter(conn, :websocket, tuple_for(adapter, websock, state, opts))
-  end
-
-  defp tuple_for(Bandit.HTTP1.Adapter, websock, state, opts), do: {websock, state, opts}
-  defp tuple_for(Bandit.HTTP2.Adapter, websock, state, opts), do: {websock, state, opts}
-
-  defp tuple_for(Plug.Cowboy.Conn, websock, state, opts) do
-    cowboy_opts =
-      opts
-      |> Enum.flat_map(fn
-        {:timeout, timeout} -> [idle_timeout: timeout]
-        {:compress, _} = opt -> [opt]
-        {:max_frame_size, _} = opt -> [opt]
-        _other -> []
-      end)
-      |> Map.new()
-
-    process_flags =
-      opts
-      |> Keyword.take([:fullsweep_after])
-      |> Map.new()
-
-    {WebSock.CowboyAdapter, {websock, process_flags, state}, cowboy_opts}
-  end
-
-  defp tuple_for(adapter, _websock, _state, _opts),
-    do: raise(ArgumentError, "Unknown adapter #{inspect(adapter)}")
 end

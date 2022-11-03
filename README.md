@@ -4,8 +4,7 @@
 [![Docs](https://img.shields.io/badge/api-docs-green.svg?style=flat)](https://hexdocs.pm/websock)
 [![Hex.pm](https://img.shields.io/hexpm/v/websock.svg?style=flat&color=blue)](https://hex.pm/packages/websock)
 
-
-WebSock is a library & specification for apps to service WebSocket connections; you can think
+WebSock is a specification for apps to service WebSocket connections; you can think
 of it as 'Plug for WebSockets'. WebSock abstracts WebSocket support from servers such as
 [Bandit](https://github.com/mtrudel/bandit/) or [Cowboy](https://github.com/ninenines/cowboy)
 and exposes a generic WebSocket API to applications. WebSocket-aware
@@ -14,28 +13,31 @@ simply by defining conformance to the `WebSock` behaviour, in the same manner as
 how Plug conformance allows their HTTP aspects to be hosted within an arbitrary
 web server.
 
-WebSocket consists of two parts:
-
-1. The `WebSock` behaviour describes the functions that an application such as
-   Phoenix must implement in order to be WebSock compliant; it is roughly the
-   equivalent of the `Plug` interface, but for WebSocket connections
-
-2. The `WebSock` library implements transparent adapters to translate
-   server-specific APIs into the `WebSock` behaviour (currently,
-   [Bandit](https://github.com/mtrudel/bandit/) and
-   [Cowboy](https://github.com/ninenines/cowboy) are supported)
+This package defines the `WebSock` behaviour describes the functions that an
+application such as Phoenix must implement in order to be WebSock compliant; it
+is roughly the equivalent of the `Plug` interface, but for WebSocket
+connections. It is commonly used in conjunction with the
+[websock_adapters](https://hex.pm/packages/websock_adapters) package which
+defines concrete adapters on top of [Bandit](https://github.com/mtrudel/bandit/)
+and [Cowboy](https://github.com/ninenines/cowboy); the two packages are separate
+to allow for servers which directly expose `WebSock` support to depend on just
+the behaviour. Users will almost always want to depend on
+[websock_adapters](https://hex.pm/packages/websock_adapters) instead of this
+package.
 
 ## WebSocket Lifecycle
 
-WebSocket connections go through a well defined lifecycle mediated by `WebSock`:
+WebSocket connections go through a well defined lifecycle mediated by `WebSock`
+and `WebSock.Adapters`:
 
 * **This step is outside the scope of the WebSock API**. A client will
   attempt to Upgrade an HTTP connection to a WebSocket connection by passing
   a specific set of headers in an HTTP request. An application may choose to
   determine the feasibility of such an upgrade request however it pleases
-* An application will then signal an upgrade to be performed by calling `WebSock.upgrade/4`, passing
-  in the `Plug.Conn` to upgrade, along with the `WebSock` compliant handler module which
-  will handle the connection once it is upgraded
+* An application will then signal an upgrade to be performed by calling
+  `WebSockAdpater.upgrade/4`, passing in the `Plug.Conn` to upgrade, along with
+  the `WebSock` compliant handler module which will handle the connection once
+  it is upgraded
 * The underlying server will then attempt to upgrade the HTTP connection to a WebSocket connection 
 * Assuming the WebSocket connection is successfully negotiated, WebSock will
   call `c:WebSock.init/1` on the configured handler to allow the application to perform any necessary
