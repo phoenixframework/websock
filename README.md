@@ -60,7 +60,7 @@ The websock package can be installed by adding `websock` to your list of depende
 ```elixir
 def deps do
   [
-    {:websock, "~> 0.4.1"}
+    {:websock, "~> 0.4.2"}
   ]
 end
 ```
