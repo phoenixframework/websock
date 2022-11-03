@@ -17,12 +17,12 @@ This package defines the `WebSock` behaviour describes the functions that an
 application such as Phoenix must implement in order to be WebSock compliant; it
 is roughly the equivalent of the `Plug` interface, but for WebSocket
 connections. It is commonly used in conjunction with the
-[websock_adapters](https://hex.pm/packages/websock_adapters) package which
+[websock_adapter](https://hex.pm/packages/websock_adapter) package which
 defines concrete adapters on top of [Bandit](https://github.com/mtrudel/bandit/)
 and [Cowboy](https://github.com/ninenines/cowboy); the two packages are separate
 to allow for servers which directly expose `WebSock` support to depend on just
 the behaviour. Users will almost always want to depend on
-[websock_adapters](https://hex.pm/packages/websock_adapters) instead of this
+[websock_adapter](https://hex.pm/packages/websock_adapter) instead of this
 package.
 
 ## WebSocket Lifecycle

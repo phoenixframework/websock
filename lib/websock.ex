@@ -2,11 +2,11 @@ defmodule WebSock do
   @moduledoc """
   Defines a behaviour which defines an interface for web servers to flexibly host WebSocket
   applications. It is commonly used in conjunction with the
-  [websock_adapters](https://hex.pm/packages/websock_adapters) package which defines concrete
+  [websock_adapter](https://hex.pm/packages/websock_adapter) package which defines concrete
   adapters on top of [Bandit](https://github.com/mtrudel/bandit/) and
   [Cowboy](https://github.com/ninenines/cowboy); the two packages are separate to allow for
   servers which directly expose `WebSock` support to depend on just the behaviour. Users will
-  almost always want to depend on [websock_adapters](https://hex.pm/packages/websock_adapters)
+  almost always want to depend on [websock_adapter](https://hex.pm/packages/websock_adapter)
   instead of this package.
 
   WebSocket connections go through a well defined lifecycle mediated by `WebSock` and
