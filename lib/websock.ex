@@ -54,8 +54,8 @@ defmodule WebSock do
 
   @typedoc "The result as returned from init, handle_in, handle_control & handle_info calls"
   @type handle_result ::
-          {:push, {opcode(), message()}, state()}
-          | {:reply, term(), {opcode(), message()}, state()}
+          {:push, {opcode(), message()} | [{opcode(), message()}], state()}
+          | {:reply, term(), {opcode(), message()} | [{opcode(), message()}], state()}
           | {:ok, state()}
           | {:stop, term(), state()}
 
@@ -82,7 +82,14 @@ defmodule WebSock do
 
   * `{:push, {opcode(), message()}, state()}`: The indicated message is sent to the client. The
     indicated state value is used to update the socket's current state
+  * `{:push, [{opcode(), message()}], state()}`: The indicated messages are sent to the client. The
+    indicated state value is used to update the socket's current state
   * `{:reply, term(), {opcode(), message()}, state()}`: The indicated message is sent to the client. The
+    indicated state value is used to update the socket's current state. The second element of the
+    tuple has no semantic meaning in this context and is ignored. This return tuple is included
+    here solely for backwards compatiblity with the `Phoenix.Socket.Transport` behaviour; it is in
+    all respects semantically identical to the `{:push, ...}` return value previously described
+  * `{:reply, term(), [{opcode(), message()}], state()}`: The indicated messages are sent to the client. The
     indicated state value is used to update the socket's current state. The second element of the
     tuple has no semantic meaning in this context and is ignored. This return tuple is included
     here solely for backwards compatiblity with the `Phoenix.Socket.Transport` behaviour; it is in
