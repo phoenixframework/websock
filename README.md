@@ -13,7 +13,7 @@ simply by defining conformance to the `WebSock` behaviour, in the same manner as
 how Plug conformance allows their HTTP aspects to be hosted within an arbitrary
 web server.
 
-This package defines the `WebSock` behaviour describes the functions that an
+This package defines the `WebSock` which describes the functions that an
 application such as Phoenix must implement in order to be WebSock compliant; it
 is roughly the equivalent of the `Plug` interface, but for WebSocket
 connections. It is commonly used in conjunction with the
