@@ -20,7 +20,7 @@ defmodule WebSock do
     `WebSockAdpater.upgrade/4`, passing in the `Plug.Conn` to upgrade, along with
     the `WebSock` compliant handler module which will handle the connection once
     it is upgraded
-  * The underlying server will then attempt to upgrade the HTTP connection to a WebSocket connection 
+  * The underlying server will then attempt to upgrade the HTTP connection to a WebSocket connection
   * Assuming the WebSocket connection is successfully negotiated, WebSock will
     call `c:WebSock.init/1` on the configured handler to allow the application to perform any necessary
     tasks now that the WebSocket connection is live
@@ -31,7 +31,7 @@ defmodule WebSock do
   * The `WebSock` implementation can send data to the client by returning
     a `{:push,...}` tuple from any of the above `handle_*` callback
   * At any time, `c:WebSock.terminate/2` may be called to indicate a close, error or
-    timeout condition 
+    timeout condition
   """
 
   @typedoc "The type of an implementing module"

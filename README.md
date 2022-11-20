@@ -1,6 +1,6 @@
 # WebSock
 
-[![Build Status](https://github.com/mtrudel/websock/workflows/Elixir%20CI/badge.svg)](https://github.com/mtrudel/websock/actions)
+[![Build Status](https://github.com/phoenixframework/websock/workflows/Elixir%20CI/badge.svg)](https://github.com/phoenixframework/websock/actions)
 [![Docs](https://img.shields.io/badge/api-docs-green.svg?style=flat)](https://hexdocs.pm/websock)
 [![Hex.pm](https://img.shields.io/hexpm/v/websock.svg?style=flat&color=blue)](https://hex.pm/packages/websock)
 
@@ -38,18 +38,18 @@ and `WebSock.Adapters`:
   `WebSockAdpater.upgrade/4`, passing in the `Plug.Conn` to upgrade, along with
   the `WebSock` compliant handler module which will handle the connection once
   it is upgraded
-* The underlying server will then attempt to upgrade the HTTP connection to a WebSocket connection 
+* The underlying server will then attempt to upgrade the HTTP connection to a WebSocket connection
 * Assuming the WebSocket connection is successfully negotiated, WebSock will
   call `c:WebSock.init/1` on the configured handler to allow the application to perform any necessary
   tasks now that the WebSocket connection is live
-* WebSock will call the configued handler's `c:WebSock.handle_in/2` callback
+* WebSock will call the configured handler's `c:WebSock.handle_in/2` callback
   whenever data is received from the client
-* WebSock will call the configued handler's `c:WebSock.handle_info/2` callback
+* WebSock will call the configured handler's `c:WebSock.handle_info/2` callback
   whenever other processes send messages to the handler process
 * The `WebSock` implementation can send data to the client by returning
-  a `{:push,...}` tuple from any of the above `handle_*` callback
+  a `{:push,...}` tuple from any of the above `handle_*` callbacks
 * At any time, `c:WebSock.terminate/2` may be called to indicate a close, error or
-  timeout condition 
+  timeout condition
 
 For more information, consult the [docs](https://hexdocs.pm/websock).
 
