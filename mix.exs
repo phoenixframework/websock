@@ -11,12 +11,12 @@ defmodule WebSock.MixProject do
       dialyzer: dialyzer(),
       name: "WebSock",
       description: "A specification for WebSocket connections",
-      source_url: "https://github.com/mtrudel/websock",
+      source_url: "https://github.com/phoenixframework/websock",
       package: [
         files: ["lib", "test", "mix.exs", "README*", "LICENSE*"],
         maintainers: ["Mat Trudel"],
         licenses: ["MIT"],
-        links: %{"GitHub" => "https://github.com/mtrudel/websock"}
+        links: %{"GitHub" => "https://github.com/phoenixframework/websock"}
       ]
     ]
   end
