@@ -58,9 +58,13 @@ defmodule WebSock do
           | {:reply, term(), {opcode(), message()} | [{opcode(), message()}], state()}
           | {:ok, state()}
           | {:stop, term(), state()}
+          | {:stop, term(), close_detail(), state()}
 
   @typedoc "Details about why a connection was closed"
   @type close_reason :: :normal | :remote | :shutdown | :timeout | {:error, term()}
+
+  @typedoc "Describes the data to send in a connection close frame"
+  @type close_detail :: integer() | {integer(), message()}
 
   @doc """
   Called by WebSock after a WebSocket connection has been established (that is, after the server
@@ -99,6 +103,9 @@ defmodule WebSock do
     reason. If `reason` is `:normal`, `c:terminate/2` will be called with a `reason` value of
     `:normal`. In all other cases, it will be called with `{:error, reason}`. Server
     implementations should also use this value when determining how to close the connection with
+    the client
+  * `{:stop, reason :: term(), close_detail(), state()}`: Similar to the previous clause, but allows
+    for the explicit setting of either a plain close code or a close code with a body to be sent to
     the client
   """
   @callback handle_in({message(), opcode: data_opcode()}, state()) :: handle_result()
