@@ -58,7 +58,7 @@ defmodule WebSock do
           | {:reply, term(), {opcode(), message()} | [{opcode(), message()}], state()}
           | {:ok, state()}
           | {:stop, term(), state()}
-          | {:stop, term(), close_reason(), state()}
+          | {:stop, term(), close_detail(), state()}
 
   @typedoc "Details about why a connection was closed"
   @type close_reason :: :normal | :remote | :shutdown | :timeout | {:error, term()}
