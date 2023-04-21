@@ -145,9 +145,11 @@ defmodule WebSock do
     handling in the local server, or the result of a `WebSock.handle_*` callback returning a `{:stop,
     reason, state}` tuple where reason is any value other than `:normal`
 
+  This callback is optional
+
   The return value of this callback is ignored
   """
   @callback terminate(reason :: close_reason(), state()) :: any()
 
-  @optional_callbacks handle_control: 2
+  @optional_callbacks handle_control: 2, terminate: 2
 end
