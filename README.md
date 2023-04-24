@@ -48,7 +48,7 @@ and `WebSock.Adapters`:
   whenever other processes send messages to the handler process
 * The `WebSock` implementation can send data to the client by returning
   a `{:push,...}` tuple from any of the above `handle_*` callbacks
-* At any time, `c:WebSock.terminate/2` may be called to indicate a close, error or
+* At any time, `c:WebSock.terminate/2` (if implemented) may be called to indicate a close, error or
   timeout condition
 
 For more information, consult the [docs](https://hexdocs.pm/websock).
