@@ -17,7 +17,7 @@ defmodule WebSock do
     a specific set of headers in an HTTP request. An application may choose to
     determine the feasibility of such an upgrade request however it pleases
   * An application will then signal an upgrade to be performed by calling
-    `WebSockAdpater.upgrade/4`, passing in the `Plug.Conn` to upgrade, along with
+    `WebSockAdapter.upgrade/4`, passing in the `Plug.Conn` to upgrade, along with
     the `WebSock` compliant handler module which will handle the connection once
     it is upgraded
   * The underlying server will then attempt to upgrade the HTTP connection to a WebSocket connection
