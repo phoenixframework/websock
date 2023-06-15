@@ -57,7 +57,7 @@ defmodule WebSock do
           {:push, {opcode(), message()} | [{opcode(), message()}], state()}
           | {:reply, term(), {opcode(), message()} | [{opcode(), message()}], state()}
           | {:ok, state()}
-          | {:stop, {:shutdown, :draining} | term(), state()}
+          | {:stop, {:shutdown, :restart} | term(), state()}
           | {:stop, term(), close_detail(), state()}
 
   @typedoc "Details about why a connection was closed"
