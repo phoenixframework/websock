@@ -101,7 +101,7 @@ defmodule WebSock do
   * `{:ok, state()}`: The indicated state value is used to update the socket's current state
   * `{:stop, reason :: term(), state()}`: The connection will be closed based on the indicated
     reason. If `reason` is `:normal`, `c:terminate/2` will be called with a `reason` value of
-    `:normal`. If the `reason` is `{:shutdown, :draining}`, the server is draining connections and
+    `:normal`. If the `reason` is `{:shutdown, :restart}`, the server is restarting and
     the WebSocket adapter should close with the `1012` Service Restart code.
     In all other cases, it will be called with `{:error, reason}`. Server
     implementations should also use this value when determining how to close the connection with
