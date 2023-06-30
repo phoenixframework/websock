@@ -1,38 +1,10 @@
 defmodule WebSock do
-  @moduledoc """
-  Defines a behaviour which defines an interface for web servers to flexibly host WebSocket
-  applications. It is commonly used in conjunction with the
-  [websock_adapter](https://hex.pm/packages/websock_adapter) package which defines concrete
-  adapters on top of [Bandit](https://github.com/mtrudel/bandit/) and
-  [Cowboy](https://github.com/ninenines/cowboy); the two packages are separate to allow for
-  servers which directly expose `WebSock` support to depend on just the behaviour. Users will
-  almost always want to depend on [websock_adapter](https://hex.pm/packages/websock_adapter)
-  instead of this package.
+  @external_resource Path.join([__DIR__, "../README.md"])
 
-  WebSocket connections go through a well defined lifecycle mediated by `WebSock` and
-  `WebSock.Adapters`:
-
-  * **This step is outside the scope of the WebSock API**. A client will
-    attempt to Upgrade an HTTP connection to a WebSocket connection by passing
-    a specific set of headers in an HTTP request. An application may choose to
-    determine the feasibility of such an upgrade request however it pleases
-  * An application will then signal an upgrade to be performed by calling
-    `WebSockAdapter.upgrade/4`, passing in the `Plug.Conn` to upgrade, along with
-    the `WebSock` compliant handler module which will handle the connection once
-    it is upgraded
-  * The underlying server will then attempt to upgrade the HTTP connection to a WebSocket connection
-  * Assuming the WebSocket connection is successfully negotiated, WebSock will
-    call `c:WebSock.init/1` on the configured handler to allow the application to perform any necessary
-    tasks now that the WebSocket connection is live
-  * WebSock will call the configued handler's `c:WebSock.handle_in/2` callback
-    whenever data is received from the client
-  * WebSock will call the configued handler's `c:WebSock.handle_info/2` callback
-    whenever other processes send messages to the handler process
-  * The `WebSock` implementation can send data to the client by returning
-    a `{:push,...}` tuple from any of the above `handle_*` callback
-  * At any time, `c:WebSock.terminate/2` may be called to indicate a close, error or
-    timeout condition
-  """
+  @moduledoc @external_resource
+             |> File.read!()
+             |> String.split("<!-- MDOC -->")
+             |> Enum.fetch!(1)
 
   @typedoc "The type of an implementing module"
   @type impl :: module()
@@ -91,12 +63,12 @@ defmodule WebSock do
   * `{:reply, term(), {opcode(), message()}, state()}`: The indicated message is sent to the client. The
     indicated state value is used to update the socket's current state. The second element of the
     tuple has no semantic meaning in this context and is ignored. This return tuple is included
-    here solely for backwards compatiblity with the `Phoenix.Socket.Transport` behaviour; it is in
+    here solely for backwards compatibility with the `Phoenix.Socket.Transport` behaviour; it is in
     all respects semantically identical to the `{:push, ...}` return value previously described
   * `{:reply, term(), [{opcode(), message()}], state()}`: The indicated messages are sent to the client. The
     indicated state value is used to update the socket's current state. The second element of the
     tuple has no semantic meaning in this context and is ignored. This return tuple is included
-    here solely for backwards compatiblity with the `Phoenix.Socket.Transport` behaviour; it is in
+    here solely for backwards compatibility with the `Phoenix.Socket.Transport` behaviour; it is in
     all respects semantically identical to the `{:push, ...}` return value previously described
   * `{:ok, state()}`: The indicated state value is used to update the socket's current state
   * `{:stop, reason :: term(), state()}`: The connection will be closed based on the indicated
@@ -143,7 +115,7 @@ defmodule WebSock do
   * `:remote`: The remote end shut down the connection
   * `:shutdown`: The local server is being shut down
   * `:timeout`: No data has been sent or received for more than the configured timeout duration
-  * `{:error, reason}`: An error ocurred. This may be the result of error
+  * `{:error, reason}`: An error occurred. This may be the result of error
     handling in the local server, or the result of a `WebSock.handle_*` callback returning a `{:stop,
     reason, state}` tuple where reason is any value other than `:normal`
 
