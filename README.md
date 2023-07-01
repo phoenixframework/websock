@@ -4,26 +4,23 @@
 [![Docs](https://img.shields.io/badge/api-docs-green.svg?style=flat)](https://hexdocs.pm/websock)
 [![Hex.pm](https://img.shields.io/hexpm/v/websock.svg?style=flat&color=blue)](https://hex.pm/packages/websock)
 
-WebSock is a specification for apps to service WebSocket connections; you can think
-of it as 'Plug for WebSockets'. WebSock abstracts WebSocket support from servers such as
-[Bandit](https://github.com/mtrudel/bandit/) or [Cowboy](https://github.com/ninenines/cowboy)
-and exposes a generic WebSocket API to applications. WebSocket-aware
-applications such as Phoenix can then be hosted within a supported web server
-simply by defining conformance to the `WebSock` behaviour, in the same manner as
-how Plug conformance allows their HTTP aspects to be hosted within an arbitrary
-web server.
+WebSock is a specification for apps to service WebSocket connections; you can
+think of it as 'Plug for WebSockets'. WebSock abstracts WebSocket support from
+servers such as [Bandit][] or [Cowboy][] and exposes a generic WebSocket API to
+applications. WebSocket-aware applications such as Phoenix can then be hosted
+within a supported web server simply by defining conformance to the `WebSock`
+behaviour, in the same manner as how Plug conformance allows their HTTP aspects
+to be hosted within an arbitrary web server.
 
-This package defines the `WebSock` behaviour which describes the functions that
-an application such as Phoenix must implement in order to be WebSock compliant; it
-is roughly the equivalent of the `Plug` interface, but for WebSocket
-connections. It is commonly used in conjunction with the
-[websock_adapter](https://hex.pm/packages/websock_adapter) package which
-defines concrete adapters on top of [Bandit](https://github.com/mtrudel/bandit/)
-and [Cowboy](https://github.com/ninenines/cowboy); the two packages are separate
-to allow for servers which directly expose `WebSock` support to depend on just
-the behaviour. Users will almost always want to depend on
-[websock_adapter](https://hex.pm/packages/websock_adapter) instead of this
-package.
+<!-- MDOC -->
+Defines the `WebSock` behaviour which describes the functions that
+an application such as Phoenix must implement in order to be WebSock compliant;
+it is roughly the equivalent of the `Plug` interface, but for WebSocket
+connections. It is commonly used in conjunction with the [websock_adapter][]
+package which defines concrete adapters on top of [Bandit][] and [Cowboy][];
+the two packages are separate to allow for servers which directly expose
+`WebSock` support to depend on just the behaviour. Users will almost always
+want to depend on [websock_adapter][] instead of this package.
 
 ## WebSocket Lifecycle
 
@@ -35,7 +32,7 @@ and `WebSock.Adapters`:
   a specific set of headers in an HTTP request. An application may choose to
   determine the feasibility of such an upgrade request however it pleases
 * An application will then signal an upgrade to be performed by calling
-  `WebSockAdpater.upgrade/4`, passing in the `Plug.Conn` to upgrade, along with
+  `WebSockAdapter.upgrade/4`, passing in the `Plug.Conn` to upgrade, along with
   the `WebSock` compliant handler module which will handle the connection once
   it is upgraded
 * The underlying server will then attempt to upgrade the HTTP connection to a WebSocket connection
@@ -50,6 +47,11 @@ and `WebSock.Adapters`:
   a `{:push,...}` tuple from any of the above `handle_*` callbacks
 * At any time, `c:WebSock.terminate/2` (if implemented) may be called to indicate a close, error or
   timeout condition
+
+[Cowboy]: https://github.com/ninenines/cowboy
+[Bandit]: https://github.com/mtrudel/bandit/
+[websock_adapter]: https://hex.pm/packages/websock_adapter
+<!-- MDOC -->
 
 For more information, consult the [docs](https://hexdocs.pm/websock).
 

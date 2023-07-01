@@ -17,6 +17,13 @@ defmodule WebSock.MixProject do
         maintainers: ["Mat Trudel"],
         licenses: ["MIT"],
         links: %{"GitHub" => "https://github.com/phoenixframework/websock"}
+      ],
+      docs: [
+        extras: [
+          "README.md": [title: "README"],
+          "CHANGELOG.md": [title: "Changelog"]
+        ],
+        main: "readme"
       ]
     ]
   end
