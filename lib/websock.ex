@@ -24,10 +24,16 @@ defmodule WebSock do
   @typedoc "All possible frame types"
   @type opcode :: data_opcode() | control_opcode()
 
+  @typedoc "The structure of an outbound message"
+  @type message :: {opcode(), payload()}
+
+  @typedoc "Convenience type for one or many messages"
+  @type messages :: message() | [message()]
+
   @typedoc "The result as returned from init, handle_in, handle_control & handle_info calls"
   @type handle_result ::
-          {:push, {opcode(), payload()} | [{opcode(), payload()}], state()}
-          | {:reply, term(), {opcode(), payload()} | [{opcode(), payload()}], state()}
+          {:push, messages(), state()}
+          | {:reply, term(), messages(), state()}
           | {:ok, state()}
           | {:stop, {:shutdown, :restart} | term(), state()}
           | {:stop, term(), close_detail(), state()}
@@ -56,16 +62,9 @@ defmodule WebSock do
 
   The return value from this callback are processed as follows:
 
-  * `{:push, {opcode(), payload()}, state()}`: The indicated payload is sent to the client. The
+  * `{:push, messages(), state()}`: The indicated message(s) are sent to the client. The
     indicated state value is used to update the socket's current state
-  * `{:push, [{opcode(), payload()}], state()}`: The indicated payloads are sent to the client. The
-    indicated state value is used to update the socket's current state
-  * `{:reply, term(), {opcode(), payload()}, state()}`: The indicated payload is sent to the client. The
-    indicated state value is used to update the socket's current state. The second element of the
-    tuple has no semantic meaning in this context and is ignored. This return tuple is included
-    here solely for backwards compatibility with the `Phoenix.Socket.Transport` behaviour; it is in
-    all respects semantically identical to the `{:push, ...}` return value previously described
-  * `{:reply, term(), [{opcode(), payload()}], state()}`: The indicated payloads are sent to the client. The
+  * `{:reply, term(), messages(), state()}`: The indicated message(s) are sent to the client. The
     indicated state value is used to update the socket's current state. The second element of the
     tuple has no semantic meaning in this context and is ignored. This return tuple is included
     here solely for backwards compatibility with the `Phoenix.Socket.Transport` behaviour; it is in
