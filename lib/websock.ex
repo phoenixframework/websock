@@ -13,7 +13,7 @@ defmodule WebSock do
   @type state :: term()
 
   @typedoc "The structure of a sent or received WebSocket message body"
-  @type message :: iodata() | nil
+  @type payload :: iodata() | nil
 
   @typedoc "Possible data frame types"
   @type data_opcode :: :text | :binary
@@ -26,8 +26,8 @@ defmodule WebSock do
 
   @typedoc "The result as returned from init, handle_in, handle_control & handle_info calls"
   @type handle_result ::
-          {:push, {opcode(), message()} | [{opcode(), message()}], state()}
-          | {:reply, term(), {opcode(), message()} | [{opcode(), message()}], state()}
+          {:push, {opcode(), payload()} | [{opcode(), payload()}], state()}
+          | {:reply, term(), {opcode(), payload()} | [{opcode(), payload()}], state()}
           | {:ok, state()}
           | {:stop, {:shutdown, :restart} | term(), state()}
           | {:stop, term(), close_detail(), state()}
@@ -36,7 +36,7 @@ defmodule WebSock do
   @type close_reason :: :normal | :remote | :shutdown | :timeout | {:error, term()}
 
   @typedoc "Describes the data to send in a connection close frame"
-  @type close_detail :: integer() | {integer(), message()}
+  @type close_detail :: integer() | {integer(), payload()}
 
   @doc """
   Called by WebSock after a WebSocket connection has been established (that is, after the server
@@ -56,16 +56,16 @@ defmodule WebSock do
 
   The return value from this callback are processed as follows:
 
-  * `{:push, {opcode(), message()}, state()}`: The indicated message is sent to the client. The
+  * `{:push, {opcode(), payload()}, state()}`: The indicated payload is sent to the client. The
     indicated state value is used to update the socket's current state
-  * `{:push, [{opcode(), message()}], state()}`: The indicated messages are sent to the client. The
+  * `{:push, [{opcode(), payload()}], state()}`: The indicated payloads are sent to the client. The
     indicated state value is used to update the socket's current state
-  * `{:reply, term(), {opcode(), message()}, state()}`: The indicated message is sent to the client. The
+  * `{:reply, term(), {opcode(), payload()}, state()}`: The indicated payload is sent to the client. The
     indicated state value is used to update the socket's current state. The second element of the
     tuple has no semantic meaning in this context and is ignored. This return tuple is included
     here solely for backwards compatibility with the `Phoenix.Socket.Transport` behaviour; it is in
     all respects semantically identical to the `{:push, ...}` return value previously described
-  * `{:reply, term(), [{opcode(), message()}], state()}`: The indicated messages are sent to the client. The
+  * `{:reply, term(), [{opcode(), payload()}], state()}`: The indicated payloads are sent to the client. The
     indicated state value is used to update the socket's current state. The second element of the
     tuple has no semantic meaning in this context and is ignored. This return tuple is included
     here solely for backwards compatibility with the `Phoenix.Socket.Transport` behaviour; it is in
@@ -82,7 +82,7 @@ defmodule WebSock do
     for the explicit setting of either a plain close code or a close code with a body to be sent to
     the client
   """
-  @callback handle_in({message(), opcode: data_opcode()}, state()) :: handle_result()
+  @callback handle_in({payload(), opcode: data_opcode()}, state()) :: handle_result()
 
   @doc """
   Called by WebSock when a ping or pong frame has been received from the client. Note that
@@ -97,7 +97,7 @@ defmodule WebSock do
 
   The return value from this callback is handled as described in `c:handle_in/2`
   """
-  @callback handle_control({message(), opcode: control_opcode()}, state()) :: handle_result()
+  @callback handle_control({payload(), opcode: control_opcode()}, state()) :: handle_result()
 
   @doc """
   Called by WebSock when the socket process receives a `c:GenServer.handle_info/2` call which was
