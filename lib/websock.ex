@@ -37,6 +37,7 @@ defmodule WebSock do
           | {:ok, state()}
           | {:stop, {:shutdown, :restart} | term(), state()}
           | {:stop, term(), close_detail(), state()}
+          | {:stop, term(), close_detail(), messages(), state()}
 
   @typedoc "Details about why a connection was closed"
   @type close_reason :: :normal | :remote | :shutdown | :timeout | {:error, term()}
@@ -80,6 +81,8 @@ defmodule WebSock do
   * `{:stop, reason :: term(), close_detail(), state()}`: Similar to the previous clause, but allows
     for the explicit setting of either a plain close code or a close code with a body to be sent to
     the client
+  * `{:stop, reason :: term(), close_detail(), state()}`: Similar to the previous clause, but allows
+    for the sending of one or more frames before sending the connection close frame to the client
   """
   @callback handle_in({payload(), opcode: data_opcode()}, state()) :: handle_result()
 
