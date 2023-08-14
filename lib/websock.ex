@@ -78,7 +78,7 @@ defmodule WebSock do
   * `{:stop, reason :: term(), close_detail(), state()}`: Similar to the previous clause, but allows
     for the explicit setting of either a plain close code or a close code with a body to be sent to
     the client
-  * `{:stop, reason :: term(), close_detail(), state()}`: Similar to the previous clause, but allows
+  * `{:stop, reason :: term(), close_detail(), messages(), state()}`: Similar to the previous clause, but allows
     for the sending of one or more frames before sending the connection close frame to the client
   """
   @callback handle_in({binary(), opcode: data_opcode()}, state()) :: handle_result()
