@@ -12,9 +12,6 @@ defmodule WebSock do
   @typedoc "The type of state passed into / returned from `WebSock` callbacks"
   @type state :: term()
 
-  @typedoc "The structure of a sent or received WebSocket message body"
-  @type payload :: iodata() | nil
-
   @typedoc "Possible data frame types"
   @type data_opcode :: :text | :binary
 
@@ -25,9 +22,9 @@ defmodule WebSock do
   @type opcode :: data_opcode() | control_opcode()
 
   @typedoc "The structure of an outbound message"
-  @type message :: {opcode(), payload()}
+  @type message :: {opcode(), iodata() | nil}
 
-  @typedoc "Convenience type for one or many messages"
+  @typedoc "Convenience type for one or many outbound messages"
   @type messages :: message() | [message()]
 
   @typedoc "The result as returned from init, handle_in, handle_control & handle_info calls"
@@ -43,7 +40,7 @@ defmodule WebSock do
   @type close_reason :: :normal | :remote | :shutdown | :timeout | {:error, term()}
 
   @typedoc "Describes the data to send in a connection close frame"
-  @type close_detail :: integer() | {integer(), payload()}
+  @type close_detail :: integer() | {integer(), iodata() | nil}
 
   @doc """
   Called by WebSock after a WebSocket connection has been established (that is, after the server
@@ -84,7 +81,7 @@ defmodule WebSock do
   * `{:stop, reason :: term(), close_detail(), state()}`: Similar to the previous clause, but allows
     for the sending of one or more frames before sending the connection close frame to the client
   """
-  @callback handle_in({payload(), opcode: data_opcode()}, state()) :: handle_result()
+  @callback handle_in({binary(), opcode: data_opcode()}, state()) :: handle_result()
 
   @doc """
   Called by WebSock when a ping or pong frame has been received from the client. Note that
@@ -99,7 +96,7 @@ defmodule WebSock do
 
   The return value from this callback is handled as described in `c:handle_in/2`
   """
-  @callback handle_control({payload(), opcode: control_opcode()}, state()) :: handle_result()
+  @callback handle_control({binary(), opcode: control_opcode()}, state()) :: handle_result()
 
   @doc """
   Called by WebSock when the socket process receives a `c:GenServer.handle_info/2` call which was
