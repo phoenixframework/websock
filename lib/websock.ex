@@ -12,9 +12,6 @@ defmodule WebSock do
   @typedoc "The type of state passed into / returned from `WebSock` callbacks"
   @type state :: term()
 
-  @typedoc "The structure of a sent or received WebSocket message body"
-  @type message :: iodata() | nil
-
   @typedoc "Possible data frame types"
   @type data_opcode :: :text | :binary
 
@@ -24,19 +21,26 @@ defmodule WebSock do
   @typedoc "All possible frame types"
   @type opcode :: data_opcode() | control_opcode()
 
+  @typedoc "The structure of an outbound message"
+  @type message :: {opcode(), iodata() | nil}
+
+  @typedoc "Convenience type for one or many outbound messages"
+  @type messages :: message() | [message()]
+
   @typedoc "The result as returned from init, handle_in, handle_control & handle_info calls"
   @type handle_result ::
-          {:push, {opcode(), message()} | [{opcode(), message()}], state()}
-          | {:reply, term(), {opcode(), message()} | [{opcode(), message()}], state()}
+          {:push, messages(), state()}
+          | {:reply, term(), messages(), state()}
           | {:ok, state()}
           | {:stop, {:shutdown, :restart} | term(), state()}
           | {:stop, term(), close_detail(), state()}
+          | {:stop, term(), close_detail(), messages(), state()}
 
   @typedoc "Details about why a connection was closed"
   @type close_reason :: :normal | :remote | :shutdown | :timeout | {:error, term()}
 
   @typedoc "Describes the data to send in a connection close frame"
-  @type close_detail :: integer() | {integer(), message()}
+  @type close_detail :: integer() | {integer(), iodata() | nil}
 
   @doc """
   Called by WebSock after a WebSocket connection has been established (that is, after the server
@@ -56,16 +60,9 @@ defmodule WebSock do
 
   The return value from this callback are processed as follows:
 
-  * `{:push, {opcode(), message()}, state()}`: The indicated message is sent to the client. The
+  * `{:push, messages(), state()}`: The indicated message(s) are sent to the client. The
     indicated state value is used to update the socket's current state
-  * `{:push, [{opcode(), message()}], state()}`: The indicated messages are sent to the client. The
-    indicated state value is used to update the socket's current state
-  * `{:reply, term(), {opcode(), message()}, state()}`: The indicated message is sent to the client. The
-    indicated state value is used to update the socket's current state. The second element of the
-    tuple has no semantic meaning in this context and is ignored. This return tuple is included
-    here solely for backwards compatibility with the `Phoenix.Socket.Transport` behaviour; it is in
-    all respects semantically identical to the `{:push, ...}` return value previously described
-  * `{:reply, term(), [{opcode(), message()}], state()}`: The indicated messages are sent to the client. The
+  * `{:reply, term(), messages(), state()}`: The indicated message(s) are sent to the client. The
     indicated state value is used to update the socket's current state. The second element of the
     tuple has no semantic meaning in this context and is ignored. This return tuple is included
     here solely for backwards compatibility with the `Phoenix.Socket.Transport` behaviour; it is in
@@ -81,8 +78,10 @@ defmodule WebSock do
   * `{:stop, reason :: term(), close_detail(), state()}`: Similar to the previous clause, but allows
     for the explicit setting of either a plain close code or a close code with a body to be sent to
     the client
+  * `{:stop, reason :: term(), close_detail(), messages(), state()}`: Similar to the previous clause, but allows
+    for the sending of one or more frames before sending the connection close frame to the client
   """
-  @callback handle_in({message(), opcode: data_opcode()}, state()) :: handle_result()
+  @callback handle_in({binary(), opcode: data_opcode()}, state()) :: handle_result()
 
   @doc """
   Called by WebSock when a ping or pong frame has been received from the client. Note that
@@ -97,7 +96,7 @@ defmodule WebSock do
 
   The return value from this callback is handled as described in `c:handle_in/2`
   """
-  @callback handle_control({message(), opcode: control_opcode()}, state()) :: handle_result()
+  @callback handle_control({binary(), opcode: control_opcode()}, state()) :: handle_result()
 
   @doc """
   Called by WebSock when the socket process receives a `c:GenServer.handle_info/2` call which was
