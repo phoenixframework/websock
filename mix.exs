@@ -13,7 +13,7 @@ defmodule WebSock.MixProject do
       description: "A specification for WebSocket connections",
       source_url: "https://github.com/phoenixframework/websock",
       package: [
-        files: ["lib", "test", "mix.exs", "README*", "LICENSE*"],
+        files: ["lib", "mix.exs", "README*", "LICENSE*", "CHANGELOG*"],
         maintainers: ["Mat Trudel"],
         licenses: ["MIT"],
         links: %{"GitHub" => "https://github.com/phoenixframework/websock"}
