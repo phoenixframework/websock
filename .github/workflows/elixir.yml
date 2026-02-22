@@ -11,3 +11,5 @@ jobs:
     uses: mtrudel/elixir-ci-actions/.github/workflows/test.yml@main
   lint:
     uses: mtrudel/elixir-ci-actions/.github/workflows/lint.yml@main
+    permissions:
+      actions: write
