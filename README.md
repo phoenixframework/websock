@@ -1,7 +1,7 @@
 # WebSock
 
 [![Build Status](https://github.com/phoenixframework/websock/workflows/Elixir%20CI/badge.svg)](https://github.com/phoenixframework/websock/actions)
-[![Docs](https://img.shields.io/badge/api-docs-green.svg?style=flat)](https://hexdocs.pm/websock)
+[![Docs](https://img.shields.io/badge/api-docs-green.svg?style=flat)](https://websock.hexdocs.pm)
 [![Hex.pm](https://img.shields.io/hexpm/v/websock.svg?style=flat&color=blue)](https://hex.pm/packages/websock)
 
 WebSock is a specification for apps to service WebSocket connections; you can
@@ -53,7 +53,7 @@ and `WebSock.Adapters`:
 [websock_adapter]: https://hex.pm/packages/websock_adapter
 <!-- MDOC -->
 
-For more information, consult the [docs](https://hexdocs.pm/websock).
+For more information, consult the [docs](https://websock.hexdocs.pm).
 
 ## Installation
 
@@ -67,7 +67,7 @@ def deps do
 end
 ```
 
-Documentation can be found at <https://hexdocs.pm/websock>.
+Documentation can be found at <https://websock.hexdocs.pm>.
 
 ## License
 
